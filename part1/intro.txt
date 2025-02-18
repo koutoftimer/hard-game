@@ -1,0 +1,10 @@
+Paul > Good morning, Syri!
+Paul > ..we have a.. problem..
+Paul > We are trapped in an asteroid ring but we don't have enough crew
+       members to handle all mining lasers.
+Paul > Existing mining protocol overloaded and can't keep up.
+Paul > We need you to make up a new protocol to let us escape this trap.
+Paul > I'm giving you access to some of our systems.
+Paul > Let me know when new core will be ready ASAP!
+Paul > I believe we have less than 5 minutes before..
+load < 

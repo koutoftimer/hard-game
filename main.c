@@ -1,35 +1,36 @@
+#include <dlfcn.h>
+#include <libgen.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <threads.h>
-#include <time.h>
+#include <unistd.h>
 
-int const NS = 1000;
-int const MS = 1000 * 1000;
+#include "strategy.h"
 
-char const *const CLEAR_SCREEN_ANSI = "\033[1;1H\033[2J";
-
-void animated_print(char const *const);
+void launch_strategy(char const *const base_dir, int id);
 
 int main(int argc, char *argv[]) {
-        puts(CLEAR_SCREEN_ANSI);
-        static char const wellcome_message[] = {
-#embed "./data/wellcome_message.txt"
-        };
-        animated_print(wellcome_message);
-        int input = getc(stdin);
-        if (input != 10) {
-                return EXIT_SUCCESS;
+        char const *const base_dir = dirname(argv[0]);
+        for (int i = 0; i < 2; ++i) {
+                launch_strategy(base_dir, i);
         }
-        puts(CLEAR_SCREEN_ANSI);
         return EXIT_SUCCESS;
 }
 
-void animated_print(char const *const content) {
-        size_t len = strlen((void *)content);
-        for (int i = 0; i < len; ++i) {
-                putc(content[i], stdout);
-                fflush(stdout);
-                thrd_sleep(&(struct timespec){.tv_nsec = 4 * MS}, NULL);
+void launch_strategy(char const *const base_dir, int id) {
+        char strategy_filename[1024] = {0};
+        sprintf(strategy_filename, "%s/part%d/strategy.so", base_dir, id);
+
+        void *dl = dlopen(strategy_filename, RTLD_LAZY);
+        if (dl == nullptr) {
+                fprintf(stderr, "%s\n", dlerror());
+                exit(EXIT_FAILURE);
         }
+        strategy_export_t *export = dlsym(dl, "strategy_export");
+        if (export == nullptr) {
+                fprintf(stderr, "%s\n", dlerror());
+                exit(EXIT_FAILURE);
+        }
+        export->strategy();
 }
