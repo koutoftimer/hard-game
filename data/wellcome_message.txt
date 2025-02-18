@@ -1,0 +1,15 @@
+Welcome!
+--------
+
+This game suppose you are familiar with C programmming language or you are
+willing to learn it. You've being warned!
+
+Inspired by:
+
+* Bitburner - a programming-based incremental game that revolves around hacking
+  and cyberpunk themes.
+* LostTerminal - A hard sci-fi hopepunk podcast following the journey of a
+  little satellite trying to understand what has happened after Earth stops
+  returning his calls.
+* PirateSoftware - founder of Pirate Software game studio and host of the game
+  jam with the theme: "you are a weapon".
