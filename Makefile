@@ -13,5 +13,8 @@ print.o: print.c print.h
 part0: ./part0/*.c ./part0/*.txt print.o
 	$(CC) $(CFLAGS) -shared -o ./part0/strategy.so print.o ./part0/strategy.c
 
-part1: ./part1/*.h ./part1/*.c ./part1/*.txt ./part1/Makefile print.o
-	$(CC) $(CFLAGS) -shared -o ./part1/strategy.so print.o ./part1/strategy.c
+part1: ./part1/*.h ./part1/*.c ./part1/*.txt ./part1/Makefile print.o ./part1/simulation.o
+	$(CC) $(CFLAGS) -shared -o ./part1/strategy.so print.o ./part1/simulation.o ./part1/strategy.c
+
+./part1/simulation.o: ./part1/simulation.c ./part1/simulation.h
+	$(CC) $(CFLAGS) -c ./part1/simulation.c -o ./part1/simulation.o
