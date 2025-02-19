@@ -32,6 +32,12 @@ static char corec[] = {
 static char coreh[] = {
 #embed "./core.h"
 };
+static char fail[] = {
+#embed "./fail.txt"
+};
+static char success[] = {
+#embed "./success.txt"
+};
 
 git_repository *create_repo();
 core_t const *const load_core();
@@ -61,9 +67,10 @@ void strategy() {
         }
 
         if (simulate(core)) {
-                TODO("unimplemented");
+                printf(CLEAR_SCREEN_ANSI);
+                animated_print(success);
         } else {
-                TODO("unimplemented");
+                animated_print(fail);
         }
 }
 

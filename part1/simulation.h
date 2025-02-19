@@ -5,9 +5,17 @@
 #include "core.h"
 
 typedef struct {
+        Object o;
+        Vec3 speed;
+        float hp;
+} TrueObject;
+
+typedef struct {
         core_t c;
         Vec3 location;
-        Object objects[1024];
+        Vec3 speed;
+        Vec3 focus;
+        TrueObject objects[1024];
         size_t objects_len;
 } state_t;
 

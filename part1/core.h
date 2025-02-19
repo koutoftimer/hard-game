@@ -7,7 +7,7 @@ typedef struct {
 } Vec3;
 
 typedef struct Object {
-        Vec3 locaiton;
+        Vec3 location;
 } Object;
 
 typedef struct {
