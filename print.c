@@ -7,7 +7,7 @@
 #include <time.h>
 
 void animated_print(char const *const content) {
-#if !DEBUG
+#ifndef DEBUG
         size_t len = strlen((void *)content);
         for (int i = 0; i + 1 < len; ++i) {
                 printf("%c", content[i]);

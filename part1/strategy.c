@@ -71,15 +71,22 @@ void strategy() {
                 animated_print(success);
         } else {
                 animated_print(fail);
+                sleep(2);
+                printf("\n");
+                exit(1);
         }
 }
 
 core_t const *const load_core() {
-        char module_name[1 << 20];
+        char module_name[1 << 20] = {0};
+#ifdef DEBUG
+        strcpy(module_name, "./core.so");
+#else
         if (scanf("%s", module_name) == -1) {
                 fprintf(stderr, "ERROR: %s\n\n", strerror(errno));
                 return nullptr;
         }
+#endif
         FILE *fp = fopen(module_name, "rb");
         if (fp == nullptr) {
                 fprintf(stderr, "ERROR: %s\n\n", strerror(errno));

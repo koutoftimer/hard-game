@@ -13,7 +13,7 @@ typedef struct Object {
 typedef struct {
         Object* (*get_nearest)(void);
         Vec3 (*get_current_locaton)(void);
-        void (*change_direction)(Vec3);
+        void (*change_focus_distance)(Vec3);
 } State;
 
 typedef struct {

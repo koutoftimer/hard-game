@@ -23,9 +23,11 @@ void strategy() {
         animated_print(intro_message());
         printf("\n");
 
+#ifndef DEBUG
         int input = getc(stdin);
         if (input != 10) {  // If not Enter => Exit
                 exit(EXIT_SUCCESS);
         }
+#endif
         puts(CLEAR_SCREEN_ANSI);
 }
