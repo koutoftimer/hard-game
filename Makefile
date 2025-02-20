@@ -1,4 +1,4 @@
-CFLAGS  = -Wall -Werror -pedantic -O2 -ggdb -std=c23 -fPIC
+CFLAGS  = -Wall -Werror -pedantic -O2 -ggdb -std=c23 -fPIC $(VAR)
 LDFLAGS = `pkg-config --libs libgit2`
 CC = clang
 

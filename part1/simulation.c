@@ -8,6 +8,8 @@
 
 #include "../print.h"
 
+#define M_PI 3.14159265358979323846 /* pi */
+
 float const MIN_DISTANCE = 100.;
 float const MAX_DISTANCE = 1000.;
 float const ASTEROID_HP = 30'000.;
@@ -15,6 +17,7 @@ float const BEAM_POWER = 10.;
 float const ASTEROID_SPEED = 2.;
 float const SHIP_SPEED = 0.;
 float const ALLOWED_DISTANCE = 25.;
+int const SIMULATION_TICKS = 1e4;
 
 state_t state;
 
@@ -84,17 +87,16 @@ TrueObject random_object() {
                 obj->location.z = -obj->location.z;
         }
 
+        // distance
         res.speed = (Vec3){
             state.location.x - obj->location.x,
             state.location.y - obj->location.y,
             state.location.z - obj->location.z,
         };
-        float const mult =
-            ASTEROID_SPEED /
-            fmax(fmax(fabs(res.speed.x), fabs(res.speed.y)), fabs(res.speed.z));
-        res.speed.x *= mult;
-        res.speed.y *= mult;
-        res.speed.z *= mult;
+        float const steps = rand_float(0, SIMULATION_TICKS - 10);
+        res.speed.x /= steps;
+        res.speed.y /= steps;
+        res.speed.z /= steps;
         return res;
 }
 
@@ -148,7 +150,7 @@ bool form_a_line(size_t n, Vec3 points[n]) {
                 if (a.x == 0 || a.y == 0 || a.z == 0) {
                         return false;
                 }
-                float const eps = 1e5;
+                float const eps = 1e-5;
                 float const xx = b.x / a.x;
                 float const yy = b.y / a.y;
                 float const zz = b.z / a.z;
@@ -160,10 +162,65 @@ bool form_a_line(size_t n, Vec3 points[n]) {
         return true;
 }
 
+float sphere_volume(float const radius) {
+        return 4. / 3. * M_PI * radius * radius * radius;
+}
+
+float cilider_volume(float const height, float const radius) {
+        return height * M_PI * radius * radius;
+}
+
+float cone_volume(float const height, float const radius) {
+        return 1. / 3. * M_PI * height * radius * radius;
+}
+
+float cut_cone_volume(float const height, float const r, float const R) {
+        return 1. / 3. * M_PI * height * (r * r + r * R + R * R);
+}
+
 void beam_targeted_object(TrueObject *const object) {
         debug("~beam_targeted_object()\n");
-        float const mult = 2 * vec3_distance(state.location, state.focus) /
-                           vec3_distance(state.location, object->o.location);
+        float const focus = vec3_distance(state.location, state.focus);
+        float const asteroid =
+            vec3_distance(state.location, object->o.location);
+
+        float mult;
+        float const beam_radius = 1.;
+        float const asteroid_radius = 1.;
+        float const asteroid_volume = sphere_volume(asteroid_radius);
+
+        if (focus * 2 < asteroid) {  // before first half
+                float const radius = beam_radius * (asteroid / focus - 1);
+                float const beam_square = M_PI * radius * radius;
+                float const asteroid_square =
+                    M_PI * asteroid_radius * asteroid_radius;
+                mult = asteroid_square / beam_square;
+
+        } else if (focus < asteroid - asteroid_radius) {  // after first half
+                float const r =
+                    beam_radius * (asteroid - focus - asteroid_radius) / focus;
+                float const R =
+                    beam_radius * (asteroid - focus + asteroid_radius) / focus;
+                float const beam_volume =
+                    cut_cone_volume(2 * asteroid_radius, r, R);
+                mult = beam_volume / asteroid_volume;
+
+        } else if (focus < asteroid + asteroid_radius) {  // inside
+                float const radius = beam_radius * asteroid_radius / asteroid;
+                float const beam_volume =
+                    2. * cone_volume(asteroid_radius, radius);
+                mult = asteroid_volume / beam_volume;
+
+        } else {  // far behind
+                float const r =
+                    beam_radius * (focus - asteroid - asteroid_radius) / focus;
+                float const R =
+                    beam_radius * (focus - asteroid + asteroid_radius) / focus;
+                float const beam_volume =
+                    cut_cone_volume(asteroid_radius, r, R);
+                mult = beam_volume / asteroid_volume;
+        }
+
         object->hp -= mult * BEAM_POWER;
 }
 
@@ -230,7 +287,7 @@ bool collide() {
 bool simulate(core_t const *const core) {
         init_state(core);
 
-        int ticks_to_survive = 1 << 20;
+        int ticks_to_survive = SIMULATION_TICKS;
         while (ticks_to_survive--) {
                 call_core_process(core);
                 update_state();

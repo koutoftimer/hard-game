@@ -21,5 +21,5 @@ typedef struct {
 
 Object *get_nearest();
 Vec3 get_current_locaton();
-void change_direction(Vec3);
+void change_focus_distance(Vec3);
 bool simulate(core_t const *const);
