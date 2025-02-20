@@ -45,7 +45,7 @@ Object *get_nearest() {
                 return nullptr;
         }
 
-        TrueObject const *nearest = state.objects;
+        Asteroid const *nearest = state.objects;
         for (size_t i = 1; i < state.objects_len; ++i) {
                 float const distance_to_object =
                     vec3_distance(*(Vec3 *)&state.objects[i].o, state.location);
@@ -70,38 +70,39 @@ Object *get_nearest() {
 Vec3 get_current_locaton() { return state.location; }
 void change_focus_distance(Vec3 focus) { state.focus = focus; }
 
-TrueObject random_object() {
-        TrueObject res = {.hp = ASTEROID_HP};
+Vec3 random_point_on_a_sphere(float const radius) { return (Vec3){0}; }
 
-        Object *const obj = &res.o;
-        obj->location.x = rand_float(MIN_DISTANCE, MAX_DISTANCE);
-        obj->location.y = rand_float(MIN_DISTANCE, MAX_DISTANCE);
-        float distance = sqrtf(obj->location.x * obj->location.x +
-                               obj->location.y * obj->location.y);
-        float true_distance = rand_float(MIN_DISTANCE, MAX_DISTANCE);
-        obj->location.z = true_distance * true_distance - distance * distance;
-        if (obj->location.z > 0) {
-                obj->location.z = sqrtf(obj->location.z);
-        }
-        if (rand() < RAND_MAX / 2) {
-                obj->location.z = -obj->location.z;
-        }
+Asteroid random_object(size_t const orbit) {
+        int const steps_to_destroy_asteroid =
+            (int)(1 + ASTEROID_HP / BEAM_POWER);
 
-        // distance
-        res.speed = (Vec3){
-            state.location.x - obj->location.x,
-            state.location.y - obj->location.y,
-            state.location.z - obj->location.z,
+        float const safe_radius =
+            orbit * steps_to_destroy_asteroid * ASTEROID_SPEED +
+            ASTEROID_SPEED * ceilf(ALLOWED_DISTANCE / ASTEROID_SPEED);
+
+        Asteroid res = {
+            .hp = ASTEROID_HP,
+            .o.location = random_point_on_a_sphere(safe_radius),
         };
-        float const steps = rand_float(0, SIMULATION_TICKS - 10);
-        res.speed.x /= steps;
-        res.speed.y /= steps;
-        res.speed.z /= steps;
+
+        Vec3 const distance_vec = {
+            state.location.x - res.o.location.x,
+            state.location.y - res.o.location.y,
+            state.location.z - res.o.location.z,
+        };
+        float const distance = sqrtf(distance_vec.x * distance_vec.x +
+                                     distance_vec.y * distance_vec.y +
+                                     distance_vec.z * distance_vec.z);
+        float const factor = ASTEROID_SPEED / distance;
+        res.speed.x = distance_vec.x * factor;
+        res.speed.y = distance_vec.y * factor;
+        res.speed.z = distance_vec.z * factor;
         return res;
 }
 
 void init_state(core_t const *core) {
-        srand(100500);
+        /* srand(100500); */
+        srand((unsigned int)time(nullptr));
 
         state.c = *core;
         state.location = (Vec3){0};
@@ -113,7 +114,7 @@ void init_state(core_t const *core) {
         };
         state.objects_len = 1 << 10;
         for (int i = 0; i < state.objects_len; ++i) {
-                state.objects[i] = random_object();
+                state.objects[i] = random_object(i + 1);
         }
         return;
 }
@@ -178,7 +179,7 @@ float cut_cone_volume(float const height, float const r, float const R) {
         return 1. / 3. * M_PI * height * (r * r + r * R + R * R);
 }
 
-void beam_targeted_object(TrueObject *const object) {
+void beam_targeted_object(Asteroid *const object) {
         debug("~beam_targeted_object()\n");
         float const focus = vec3_distance(state.location, state.focus);
         float const asteroid =
@@ -221,14 +222,16 @@ void beam_targeted_object(TrueObject *const object) {
                 mult = beam_volume / asteroid_volume;
         }
 
+        debug("~beam_targeted_object(): mult=%f\n", mult);
+
         object->hp -= mult * BEAM_POWER;
 }
 
-TrueObject *const select_beam_target() {
+Asteroid *const select_beam_target() {
         debug("~select_beam_target()\n");
-        TrueObject *target = nullptr;
+        Asteroid *target = nullptr;
         for (size_t i = 0; i < state.objects_len; ++i) {
-                TrueObject *object = &state.objects[i];
+                Asteroid *object = &state.objects[i];
                 if (!form_a_line(3, (Vec3[]){state.location, object->o.location,
                                              state.focus})) {
                         continue;
@@ -245,7 +248,7 @@ TrueObject *const select_beam_target() {
 void update_state() {
         debug("~update_state()\n");
         // select asteroid/target for focused beam
-        TrueObject *target = select_beam_target();
+        Asteroid *target = select_beam_target();
         if (target == nullptr) {
                 goto skip_beaming;
         }
@@ -263,7 +266,7 @@ skip_beaming:
 
         // move objects
         for (size_t i = 0; i < state.objects_len; ++i) {
-                TrueObject *object = &state.objects[i];
+                Asteroid *object = &state.objects[i];
                 object->o.location.x += object->speed.x;
                 object->o.location.y += object->speed.y;
                 object->o.location.z += object->speed.z;
@@ -275,7 +278,7 @@ skip_beaming:
 
 bool collide() {
         for (size_t i = 0; i < state.objects_len; ++i) {
-                TrueObject *object = &state.objects[i];
+                Asteroid *object = &state.objects[i];
                 if (vec3_distance(object->o.location, state.location) <
                     ALLOWED_DISTANCE) {
                         return true;

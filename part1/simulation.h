@@ -8,14 +8,14 @@ typedef struct {
         Object o;
         Vec3 speed;
         float hp;
-} TrueObject;
+} Asteroid;
 
 typedef struct {
         core_t c;
         Vec3 location;
         Vec3 speed;
         Vec3 focus;
-        TrueObject objects[1024];
+        Asteroid objects[1024];
         size_t objects_len;
 } state_t;
 
