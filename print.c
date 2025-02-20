@@ -6,7 +6,9 @@
 #include <threads.h>
 #include <time.h>
 
-void animated_print(char const *const content) {
+void
+animated_print(char const *const content)
+{
 #ifndef DEBUG
         size_t len = strlen((void *)content);
         for (int i = 0; i + 1 < len; ++i) {
@@ -17,7 +19,9 @@ void animated_print(char const *const content) {
 #endif
 }
 
-void write_file(char const *const filename, char const *const data) {
+void
+write_file(char const *const filename, char const *const data)
+{
         FILE *fp = fopen(filename, "w");
         fwrite(data, 1, strlen(data), fp);
         if (ferror(fp)) {

@@ -10,7 +10,9 @@
 
 void launch_strategy(char const *const base_dir, int id);
 
-int main(int argc, char *argv[]) {
+int
+main(int argc, char *argv[])
+{
         char const *const base_dir = dirname(argv[0]);
         for (int i = 0; i < 2; ++i) {
                 launch_strategy(base_dir, i);
@@ -18,7 +20,9 @@ int main(int argc, char *argv[]) {
         return EXIT_SUCCESS;
 }
 
-void launch_strategy(char const *const base_dir, int id) {
+void
+launch_strategy(char const *const base_dir, int id)
+{
         char strategy_filename[1024] = {0};
         sprintf(strategy_filename, "%s/part%d/strategy.so", base_dir, id);
 

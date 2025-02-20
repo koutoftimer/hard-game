@@ -11,14 +11,18 @@
 
 #include "../print.h"
 
-char const *const intro_message() {
+char const *const
+intro_message()
+{
         static char message[] = {
 #embed "intro.txt"
         };
         return message;
 }
 
-void strategy() {
+void
+strategy()
+{
         puts(CLEAR_SCREEN_ANSI);
         animated_print(intro_message());
         printf("\n");

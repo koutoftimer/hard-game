@@ -16,7 +16,9 @@
 #include "./core.h"
 #include "./simulation.h"
 
-char const *const intro_message() {
+char const *const
+intro_message()
+{
         static char message[] = {
 #embed "./intro.txt"
         };
@@ -42,7 +44,9 @@ static char success[] = {
 git_repository *create_repo();
 core_t const *const load_core();
 
-void strategy() {
+void
+strategy()
+{
         // create git repo
         git_libgit2_init();
         git_repository *repo = create_repo();
@@ -77,7 +81,9 @@ void strategy() {
         }
 }
 
-core_t const *const load_core() {
+core_t const *const
+load_core()
+{
         char module_name[1 << 20] = {0};
 #ifdef DEBUG
         strcpy(module_name, "./core.so");
@@ -109,7 +115,9 @@ core_t const *const load_core() {
         return export;
 }
 
-git_repository *create_repo() {
+git_repository *
+create_repo()
+{
         git_repository *repo = nullptr;
         char const *const cwd = getcwd(nullptr, 0);
         int err = git_repository_init(&repo, cwd, false);

@@ -1,2 +1,5 @@
 BasedOnStyle: Google
 IndentWidth: 8
+BreakAfterReturnType: TopLevelDefinitions
+BreakBeforeBraces: Linux
+IndentCaseLabels: false
